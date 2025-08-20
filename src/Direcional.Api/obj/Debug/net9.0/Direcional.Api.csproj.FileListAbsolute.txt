@@ -173,3 +173,7 @@ C:\Study\Direcional\src\Direcional.Api\obj\Debug\net9.0\refint\Direcional.Api.dl
 C:\Study\Direcional\src\Direcional.Api\obj\Debug\net9.0\Direcional.Api.pdb
 C:\Study\Direcional\src\Direcional.Api\obj\Debug\net9.0\Direcional.Api.genruntimeconfig.cache
 C:\Study\Direcional\src\Direcional.Api\obj\Debug\net9.0\ref\Direcional.Api.dll
+C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Newtonsoft.Json.Bson.dll
