@@ -6,22 +6,37 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Config EF Core
+// ---------------------- EF Core (SQL Server) ----------------------
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+{
+    opt.UseSqlServer(
+        builder.Configuration.GetConnectionString("SqlServer"),
+        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null) // resiliência
+    );
+});
 
-// Controllers + FluentValidation
-//builder.Services.AddControllers()
-  //  .AddNewtonsoftJson();
+// ---------------- Controllers + FluentValidation ------------------
+builder.Services
+    .AddControllers()
+    .AddNewtonsoftJson(); // remova esta linha se não usar Newtonsoft
+
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // pega validators do assembly
 
-// JWT
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//
+builder.Services.AddAuthorization();
+
+var jwtKey = builder.Configuration["Jwt:Key"] 
+             ?? throw new InvalidOperationException("JWT Key (Jwt:Key) não foi configurada");//
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
         o.TokenValidationParameters = new TokenValidationParameters
@@ -29,33 +44,42 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
-// DI
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// Swagger
+
+
+// configiração do swagger pt 8080 dck
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Direcional.Api", Version = "v1" });
-    // Auth no Swagger
-    c.AddSecurityDefinition("Bearer", new()
+
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Direcional API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT no header. Ex: Bearer {seu_token}",
+        Description = "Autenticação JWT via header Authorization. Ex: Bearer {token}",
         Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "bearer"
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
-    c.AddSecurityRequirement(new()
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new() { Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } },
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
             Array.Empty<string>()
         }
     });
@@ -63,13 +87,10 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI(); 
+
 
 app.UseAuthentication();
 app.UseAuthorization();
