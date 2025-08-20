@@ -14,8 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
 
 
-               /* modelBuilder.Entity<Teste>()
-            .HasOne(v => v.Teste).WithMany().HasForeignKey(v => v.Testeid);*/
+        /* modelBuilder.Entity<Teste>()
+     .HasOne(v => v.Teste).WithMany().HasForeignKey(v => v.Testeid);*/
 
 
 
@@ -43,5 +43,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasOne(v => v.Apartamento).WithMany().HasForeignKey(v => v.ApartamentoId);
 
         base.OnModelCreating(modelBuilder);
+        
     }
 }
