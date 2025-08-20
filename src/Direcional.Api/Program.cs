@@ -27,11 +27,11 @@ builder.Services
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // pega validators do assembly
 
-// -------------------------- Auth (JWT) ----------------------------
+//
 builder.Services.AddAuthorization();
 
 var jwtKey = builder.Configuration["Jwt:Key"] 
-             ?? throw new InvalidOperationException("JWT Key (Jwt:Key) não configurada");
+             ?? throw new InvalidOperationException("JWT Key (Jwt:Key) não foi configurada");//
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
@@ -50,18 +50,20 @@ builder.Services
         };
     });
 
-// Serviços da aplicação
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// ------------------------ Swagger + Bearer ------------------------
+
+
+// configiração do swagger pt 8080 dck
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Direcional API", Version = "v1" });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Autenticação JWT via header Authorization. Ex: **Bearer {token}**",
+        Description = "Autenticação JWT via header Authorization. Ex: Bearer {token}",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
@@ -85,12 +87,10 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Swagger sempre habilitado (útil no container)
-app.UseSwagger();
-app.UseSwaggerUI(); // /swagger
 
-// ⚠ Se seu container serve apenas HTTP, NÃO ative redirecionamento para HTTPS
-// app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI(); 
+
 
 app.UseAuthentication();
 app.UseAuthorization();
