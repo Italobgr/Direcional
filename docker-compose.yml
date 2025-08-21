@@ -1,0 +1,36 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: direcional_sql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Your_strong_password123
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Your_strong_password123' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mssqldata:/var/opt/mssql
+
+  api:
+    build:
+      context: ./src/Direcional.Api
+      dockerfile: Dockerfile
+    container_name: direcional_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    # usa a connection string do appsettings.json apontando para "sqlserver"
+    # se quiser sobrescrever, adicione aqui:
+    # environment:
+    #   - ConnectionStrings__SqlServer=Server=sqlserver,1433;Database=DirecionalDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True
+
+volumes:
+  mssqldata:

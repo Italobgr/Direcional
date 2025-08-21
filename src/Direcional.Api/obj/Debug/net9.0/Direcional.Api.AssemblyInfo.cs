@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Direcional.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+591c91bedc6675dd3b39843a42e33c80d9986449")]
 [assembly: System.Reflection.AssemblyProductAttribute("Direcional.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Direcional.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
