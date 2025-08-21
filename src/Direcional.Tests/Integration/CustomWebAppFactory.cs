@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace RealEstate.Tests.Integration;
+namespace Direcional.Tests.Integration;
 
 public class CustomWebAppFactory : WebApplicationFactory<Program>
 {
@@ -37,6 +37,16 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
             db.Database.EnsureCreated();
         });
     }
+
+
+
+
+
+
+
+
+
+
 
     protected override void Dispose(bool disposing)
     {
