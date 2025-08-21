@@ -10,7 +10,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------------------- EF Core (SQL Server) ----------------------
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(
@@ -19,10 +19,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     );
 });
 
-// ---------------- Controllers + FluentValidation ------------------
+
 builder.Services
     .AddControllers()
-    .AddNewtonsoftJson(); // remova esta linha se não usar Newtonsoft
+    .AddNewtonsoftJson(); 
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // pega validators do assembly
