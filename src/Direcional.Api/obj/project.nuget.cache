@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "SYYUu9Gt3ig=",
+  "dgSpecHash": "C8Zgtaqtqr0=",
   "success": true,
   "projectFilePath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj",
   "expectedPackageFiles": [
@@ -32,6 +32,7 @@
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.8\\microsoft.entityframeworkcore.abstractions.9.0.8.nupkg.sha512",
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\9.0.8\\microsoft.entityframeworkcore.analyzers.9.0.8.nupkg.sha512",
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.design\\9.0.8\\microsoft.entityframeworkcore.design.9.0.8.nupkg.sha512",
+    "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.inmemory\\9.0.8\\microsoft.entityframeworkcore.inmemory.9.0.8.nupkg.sha512",
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\9.0.8\\microsoft.entityframeworkcore.relational.9.0.8.nupkg.sha512",
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.sqlserver\\9.0.8\\microsoft.entityframeworkcore.sqlserver.9.0.8.nupkg.sha512",
     "C:\\Users\\Pc Gamer\\.nuget\\packages\\microsoft.entityframeworkcore.tools\\9.0.8\\microsoft.entityframeworkcore.tools.9.0.8.nupkg.sha512",

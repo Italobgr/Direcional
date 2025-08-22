@@ -7,7 +7,7 @@ namespace Direcional.Api.Services;
 
 public class TokenService(IConfiguration cfg) : ITokenService
 {
-    public string GenerateToken(string username, string role)
+    public string GeraToken(string username, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
