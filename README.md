@@ -13,7 +13,7 @@ Inclui autenticação via **JWT**, documentação **Swagger** e **testes de inte
 ##  Configuração do ambiente
 ### 1. Clonar o repositório
 ```
-git clone https://github.com/seu-repo/direcional-api.git
+git clone https://github.com/Italobgr/Direcional.git
 cd direcional-api
 ```
 ### 2. Subir o ambiente com Docker
@@ -28,7 +28,7 @@ Isso sobe:
 http://localhost:8080/swagger
 ```
 ---
-## ■ Autenticação
+##  Autenticação
 A API usa **JWT Bearer Token**.
 ### Exemplo de login
 ```
