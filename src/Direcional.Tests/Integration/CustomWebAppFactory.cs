@@ -32,11 +32,13 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
                 opt.UseSqlite(_connection);
             });
 
-            // erro ao criar o banco de dados em memória - tkx
-            using var testee = services.BuildServiceProvider().CreateScope();
 
 
-            var db = testee.ServiceProvider.GetRequiredService<AppDbContext>();
+
+
+            // cria o banco em memeria - tkx
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
         });
     }
