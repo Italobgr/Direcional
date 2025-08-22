@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -5,15 +7,17 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Your_strong_password123
+      - MSSQL_PID=Express
     ports:
       - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Your_strong_password123' -C -Q 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
-    volumes:
-      - mssqldata:/var/opt/mssql
+    restart: unless-stopped
 
   api:
     build:
@@ -21,16 +25,19 @@ services:
       dockerfile: Dockerfile
     container_name: direcional_api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Connection string para a API (dentro da rede do compose o host é "sqlserver")
+      - ConnectionStrings__SqlServer=Server=sqlserver,1433;Database=Direcional;User Id=sa;Password=Your_strong_password123;Encrypt=True;TrustServerCertificate=True
+      # (Opcional) JWT – ajuste conforme seu Program.cs/appsettings
+      - Jwt__Issuer=Direcional
+      - Jwt__Audience=DirecionalUsers
+      - Jwt__Key=CHANGE_THIS_TO_A_LONG_RANDOM_SECRET
     depends_on:
       sqlserver:
         condition: service_healthy
     ports:
       - "8080:8080"
-    # usa a connection string do appsettings.json apontando para "sqlserver"
-    # se quiser sobrescrever, adicione aqui:
-    # environment:
-    #   - ConnectionStrings__SqlServer=Server=sqlserver,1433;Database=DirecionalDb;User Id=sa;Password=Your_strong_password123;TrustServerCertificate=True
+    restart: unless-stopped
 
 volumes:
   mssqldata:

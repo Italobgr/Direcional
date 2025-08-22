@@ -177,3 +177,4 @@ C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Jso
 C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Newtonsoft.Json.dll
 C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Newtonsoft.Json.Bson.dll
+C:\Study\Direcional\src\Direcional.Api\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.InMemory.dll
