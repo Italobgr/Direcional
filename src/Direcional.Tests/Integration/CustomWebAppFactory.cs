@@ -4,60 +4,63 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Direcional.Tests.Integration;
 
 public class CustomWebAppFactory : WebApplicationFactory<Program>
 {
-
     private SqliteConnection? _connection;
 
-    //troca para SQLite in-memory para testes deintegração
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureServices(services =>
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
 
 
-            
-            // removendo o AppDbContext 
-            var testedbDesc = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (testedbDesc != null) services.Remove(testedbDesc);
-  
+        builder.UseEnvironment("Testing");
+        builder.ConfigureAppConfiguration((ctx, cfg) =>
+        {
+            cfg.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Key"] = "MinhaChaveJWT-Segura-De-Teste-1234567890!",
+                ["Jwt:Issuer"] = "Direcional",
+                ["Jwt:Audience"] = "DirecionalUsers"
+            });
+        });
 
+        builder.ConfigureServices(services =>
+        {
+            // Remova TUDO que for do AppDbContext registrado pela API
+            var toRemove = services
+                .Where(d =>
+                       d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                       d.ServiceType == typeof(AppDbContext) ||
+                       d.ServiceType == typeof(IDbContextFactory<AppDbContext>))
+                .ToList();
+            foreach (var d in toRemove) services.Remove(d);
 
-
-            
-            _connection = new SqliteConnection("DataSource=:memory:");
+            // Conexão SQLite em memória (compartilhada)
+            _connection = new SqliteConnection("Data Source=:memory:");
             _connection.Open();
+
+            // >>> Isola o provedor do EF para evitar conflito com SqlServer <<<
+            var efProvider = new ServiceCollection()
+                .AddEntityFrameworkSqlite()
+                .BuildServiceProvider();
 
             services.AddDbContext<AppDbContext>(opt =>
             {
                 opt.UseSqlite(_connection);
+                opt.UseInternalServiceProvider(efProvider); // isolamento do provedor
             });
 
-
-
-
-
-            // cria o banco em memeria - tkx
-            using var scope = services.BuildServiceProvider().CreateScope();
+            // Cria o schema
+            using var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
         });
     }
-
-
-
-
-
-
-
-
-
-
 
     protected override void Dispose(bool disposing)
     {

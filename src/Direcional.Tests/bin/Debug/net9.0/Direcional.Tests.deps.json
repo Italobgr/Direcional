@@ -44,6 +44,7 @@
           "Microsoft.Data.Sqlite": "8.0.19",
           "Microsoft.EntityFrameworkCore.InMemory": "9.0.8",
           "Microsoft.EntityFrameworkCore.Sqlite": "9.0.8",
+          "Microsoft.Extensions.Configuration.Json": "9.0.8",
           "Microsoft.NET.Test.Sdk": "17.12.0",
           "coverlet.collector": "6.0.4",
           "xunit": "2.9.2",

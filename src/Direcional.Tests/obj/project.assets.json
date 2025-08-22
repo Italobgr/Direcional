@@ -2387,6 +2387,7 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.0",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "9.0.0",
           "Microsoft.AspNetCore.OpenApi": "9.0.1",
+          "Microsoft.EntityFrameworkCore.InMemory": "9.0.0",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.0",
           "Swashbuckle.AspNetCore": "6.0.0"
         },
@@ -5894,6 +5895,7 @@
       "Microsoft.Data.Sqlite >= 8.*",
       "Microsoft.EntityFrameworkCore.InMemory >= 9.*",
       "Microsoft.EntityFrameworkCore.Sqlite >= 9.*",
+      "Microsoft.Extensions.Configuration.Json >= 9.*",
       "Microsoft.NET.Test.Sdk >= 17.12.0",
       "coverlet.collector >= 6.*",
       "xunit >= 2.9.2",
@@ -5975,6 +5977,10 @@
             "version": "[9.*, )"
           },
           "Microsoft.EntityFrameworkCore.Sqlite": {
+            "target": "Package",
+            "version": "[9.*, )"
+          },
+          "Microsoft.Extensions.Configuration.Json": {
             "target": "Package",
             "version": "[9.*, )"
           },

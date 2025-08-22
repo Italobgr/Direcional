@@ -7,19 +7,30 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+ // é aqui que vive UseInMemoryDatabase
+
 
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddDbContext<AppDbContext>(opt =>
+// DbContext: usa InMemory nos testes e SQL Server no resto
+if (builder.Environment.IsEnvironment("Testing"))
 {
-    opt.UseSqlServer(
-        builder.Configuration.GetConnectionString("SqlServer"),
-        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null) 
-    );
-});
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+        opt.UseInMemoryDatabase("DirecionalTestsDb"));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+    {
+        opt.UseSqlServer(
+            builder.Configuration.GetConnectionString("SqlServer"),
+            sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null));
+    });
+}
+
 
 
 builder.Services
