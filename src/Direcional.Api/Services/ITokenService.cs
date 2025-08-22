@@ -2,5 +2,5 @@ namespace Direcional.Api.Services;
 
 public interface ITokenService
 {
-    string GenerateToken(string username, string role);
+    string GeraToken(string username, string role);
 }

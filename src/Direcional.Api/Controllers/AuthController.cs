@@ -15,10 +15,11 @@ public class AuthController(ITokenService tokenSvc) : ControllerBase
 
 
 
-        // Validação fake só para POC.
-        if (req.Username == "corretor" && req.Password == "54321")
+
+        // validação de autenticação - trocar
+        if (req.Username == "corretor" && req.Password == "12345")
         {
-            var token = tokenSvc.GenerateToken(req.Username, "Corretor");
+            var token = tokenSvc.GeraToken(req.Username, "Corretor");
             return Ok(new { token });
         }
         return Unauthorized();

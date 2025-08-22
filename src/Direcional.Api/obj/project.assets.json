@@ -699,6 +699,24 @@
           "build/net8.0/Microsoft.EntityFrameworkCore.Design.props": {}
         }
       },
+      "Microsoft.EntityFrameworkCore.InMemory/9.0.8": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "9.0.8",
+          "Microsoft.Extensions.Caching.Memory": "9.0.8",
+          "Microsoft.Extensions.Logging": "9.0.8"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.EntityFrameworkCore.Relational/9.0.8": {
         "type": "package",
         "dependencies": {
@@ -3229,6 +3247,21 @@
         "microsoft.entityframeworkcore.design.nuspec"
       ]
     },
+    "Microsoft.EntityFrameworkCore.InMemory/9.0.8": {
+      "sha512": "F5+lo74OJH9iik/WtMae9ySeew1pxiYSmODkTmHo7n7JsCM5flW1WlUCjACoe7XM9Gng2ndUwXjIizhzx3Os5w==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.inmemory/9.0.8",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.xml",
+        "microsoft.entityframeworkcore.inmemory.9.0.8.nupkg.sha512",
+        "microsoft.entityframeworkcore.inmemory.nuspec"
+      ]
+    },
     "Microsoft.EntityFrameworkCore.Relational/9.0.8": {
       "sha512": "OVhfyxiHxMvYpwQ8Jy3YZi4koy6TK5/Q7C1oq3z6db+HEGuu6x9L1BX5zDIdJxxlRePMyO4D8ORiXj/D7+MUqw==",
       "type": "package",
@@ -5304,6 +5337,7 @@
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 9.*",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 9.*",
       "Microsoft.AspNetCore.OpenApi >= 9.0.1",
+      "Microsoft.EntityFrameworkCore.InMemory >= 9.*",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.*",
       "Microsoft.EntityFrameworkCore.Tools >= 9.*",
       "Swashbuckle.AspNetCore >= 6.*"
@@ -5382,6 +5416,10 @@
           "Microsoft.AspNetCore.OpenApi": {
             "target": "Package",
             "version": "[9.0.1, )"
+          },
+          "Microsoft.EntityFrameworkCore.InMemory": {
+            "target": "Package",
+            "version": "[9.*, )"
           },
           "Microsoft.EntityFrameworkCore.SqlServer": {
             "target": "Package",
