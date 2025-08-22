@@ -13,15 +13,21 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
 
     private SqliteConnection? _connection;
 
-    //troca para SQLite in-memory para testes
+    //troca para SQLite in-memory para testes deintegração
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
+
+
+            
             // removendo o AppDbContext 
             var testedbDesc = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
             if (testedbDesc != null) services.Remove(testedbDesc);
+  
+
+
 
             
             _connection = new SqliteConnection("DataSource=:memory:");
