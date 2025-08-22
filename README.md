@@ -1,129 +1,259 @@
 # Direcional API
 
-API desenvolvida em **.NET 9** para gestão de clientes, apartamentos, vendas e reservas.
+API desenvolvida em **.NET 9** para gestão de **clientes**, **apartamentos**, **reservas** e **vendas**, com **autenticação JWT**, **Entity Framework Core** e **SQL Server Express**.  
+Documentação via **Swagger** e testes (mínimos) com **xUnit**.
 
-Inclui autenticação via **JWT**, documentação com **Swagger** e **testes de integração** utilizando SQLite.
-
----
-
-## 🚀 Tecnologias
-
-- .NET 9
-- Entity Framework Core
-- SQL Server Express
-- JWT Bearer Authentication
-- FluentValidation
-- Swagger / Swashbuckle
-- xUnit + WebApplicationFactory (Testes de Integração)
+> Nota: quando baixei o projeto pela primeira vez, precisei **rodar/atualizar as migrations** antes de subir tudo. Já deixei isso documentado abaixo.
 
 ---
 
-## 🛠️ Configuração do Ambiente
+## 📑 Sumário
 
-### 1. Clonar o repositório
+- [Como rodar com Docker](#-como-rodar-com-docker)
+- [Estrutura de pastas (resumo)](#-estrutura-de-pastas-resumo)
+- [Variáveis de ambiente](#-variáveis-de-ambiente)
+- [Banco de dados: estrutura das tabelas](#-banco-de-dados-estrutura-das-tabelas)
+- [Geração e uso do token JWT](#-geração-e-uso-do-token-jwt)
+- [Exemplos de requisições](#-exemplos-de-requisições)
+- [Testes (opcional)](#-testes-opcional)
+- [Dicas de solução de problemas](#-dicas-de-solução-de-problemas)
+- [Decisões técnicas & considerações](#-decisões-técnicas--considerações)
+- [Licença](#-licença)
 
+---
+
+## 🚀 Como rodar com Docker
+
+Pré-requisitos:
+- Docker + Docker Compose
+- Porta `8080` livre para a API
+- Porta `1433` livre para o SQL Server (ou mapeie outra)
+
+### Passo a passo
+
+1. **Clonar o repositório**
 ```bash
-git clone [https://github.com/Italobgr/Direcional.git](https://github.com/Italobgr/Direcional.git)
-cd direcional-api
-2. Subir o ambiente com Docker
+git clone https://github.com/<seu-usuario>/<seu-repo>.git
+cd <seu-repo>
+
+```
+(Somente na 1ª vez) Rodar migrations
+Se você acabou de clonar, aplique as migrations antes de subir os containers.
+
+Localmente (requer SDK .NET instalado):
 
 
+```
+dotnet tool restore
+dotnet restore
+dotnet build
+dotnet ef database update --project src/Direcional/Direcional.csproj
+
+```
+Subir tudo
+
+```
 docker compose up -d --build
+```
 
-Depois rodar o comando para atualizar migrations:
+API: http://localhost:8080
 
-dotnet ef database update 
+Swagger: http://localhost:8080/swagger
 
-Isso irá iniciar:
+SQL Server: localhost,1433
 
-A API em http://localhost:8080
+Estrutura de pastas (resumo)
 
-Uma instância do SQL Server em um contêiner
+```
+root
+ ├─ docker/
+ │   ├─ api.Dockerfile
+ │   └─ sqlserver.env
+ ├─ src/
+ │   └─ Direcional/
+ │       ├─ Controllers/
+ │       ├─ Domain/
+ │       ├─ Infrastructure/
+ │       ├─ Application/
+ │       ├─ Program.cs
+ │       └─ appsettings.json
+ ├─ tests/
+ │   └─ Direcional.Tests/
+ └─ docker-compose.yml
+ ariáveis de ambiente
+```
+Exemplo no docker-compose.yml:
+```
 
-3. Acessar a Documentação (Swagger)
-A documentação da API estará disponível em:
-http://localhost:8080/swagger
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Your_strong_Password123!
+    ports:
+      - "1433:1433"
 
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__Default=Server=db;Database=DirecionalDb;User=sa;Password=Your_strong_Password123!;TrustServerCertificate=True
+      - Jwt__Issuer=Direcional
+      - Jwt__Audience=Direcional.Client
+      - Jwt__Key=dev-secret-please-change
+      - Jwt__ExpiresMinutes=120
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+```
+Banco de dados: estrutura das tabelas
+clientes
+Id (PK, GUID)
 
-🔑 Autenticação
-A API utiliza autenticação via JWT Bearer Token. Para acessar os endpoints protegidos, você precisa primeiro obter um token.
+Nome
 
-Exemplo de Login
-Bash
+Cpf (único)
 
-curl -X POST http://localhost:8080/api/auth/login \
--H "Content-Type: application/json" \
--d '{
-  "username": "seu_usuario",
-  "password": "sua_senha"
-}'
-Resposta esperada:
+Email
 
-JSON
+Telefone
+
+CriadoEm
+
+apartamentos
+Id (PK, GUID)
+
+Bloco
+
+Numero
+
+AreaM2
+
+Quartos
+
+Valor
+
+Status → Disponivel, Reservado, Vendido
+
+CriadoEm
+
+reservas
+Id (PK, GUID)
+
+ClienteId (FK → clientes.Id)
+
+ApartamentoId (FK → apartamentos.Id)
+
+ValorSinal
+
+DataReserva
+
+Status → Ativa, Cancelada, Convertida
+
+vendas
+Id (PK, GUID)
+
+ClienteId (FK → clientes.Id)
+
+ApartamentoId (FK → apartamentos.Id)
+
+ValorEntrada
+
+ValorTotal
+
+DataVenda
+
+OrigemReservaId (FK opcional → reservas.Id)
+
+Geração e uso do token JWT
+Login
+
+```
+POST /api/auth/login
+Content-Type: application/json
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR..."
+  "username": "corretor",
+  "password": "123456"
 }
-Use o token recebido no cabeçalho Authorization das suas requisições ou no campo Authorize do Swagger:
+```
+Resposta
+```
 
-Authorization: Bearer {seu_token}
-Endpoints Principais
-Clientes
-Bash
+{
+  "accessToken": "<jwt-aqui>",
+  "expiresIn": 7200,
+  "tokenType": "Bearer"
+}
+```
+Usar em chamadas
 
-# Listar todos os clientes
-curl -X GET http://localhost:8080/api/clientes -H "Authorization: Bearer {token}"
 
-# Criar um novo cliente
+Authorization: Bearer <jwt-aqui>
+Exemplos de requisições
+
+Criar cliente
+
+```
 curl -X POST http://localhost:8080/api/clientes \
--H "Authorization: Bearer {token}" \
--H "Content-Type: application/json" \
--d '{ "nome": "Novo Cliente", "email": "cliente@exemplo.com" }'
-
-# Atualizar um cliente existente
-curl -X PUT http://localhost:8080/api/clientes/1 \
--H "Authorization: Bearer {token}" \
--H "Content-Type: application/json" \
--d '{ "id": 1, "nome": "Cliente Atualizado", "email": "cliente.atualizado@exemplo.com" }'
-
-# Remover um cliente
-curl -X DELETE http://localhost:8080/api/clientes/1 -H "Authorization: Bearer {token}"
-Apartamentos
-Bash
-
-# Listar todos os apartamentos
-curl -X GET http://localhost:8080/api/apartamentos -H "Authorization: Bearer {token}"
-Vendas
-Bash
-
-# Criar uma nova venda
-curl -X POST http://localhost:8080/api/vendas \
--H "Authorization: Bearer {token}" \
--H "Content-Type: application/json" \
--d '{ "clienteId": 1, "apartamentoId": 101, "valor": 500000.00 }'
-Reservas
-Bash
-
-# Criar uma nova reserva
+ -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
+ -d '{"nome":"Maria Souza","cpf":"12345678901","email":"maria@exemplo.com","telefone":"31999990000"}'
+```
+Criar apartamento
+```
+curl -X POST http://localhost:8080/api/apartamentos \
+ -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
+ -d '{"bloco":"A","numero":"302","areaM2":64.5,"quartos":2,"valor":380000,"status":"Disponivel"}'
+```
+Criar reserva
+```
 curl -X POST http://localhost:8080/api/reservas \
--H "Authorization: Bearer {token}" \
--H "Content-Type: application/json" \
--d '{ "clienteId": 2, "apartamentoId": 102, "dataReserva": "2024-10-20T10:00:00Z" }'
-✅ Testes
-Os testes de integração são executados com SQLite in-memory, garantindo que não haja dependência de um banco de dados externo como o SQL Server.
-
-Como executar os testes:
-Bash
-
+ -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
+ -d '{"clienteId":"<guid-cliente>","apartamentoId":"<guid-apartamento>","valorSinal":10000}'
+```
+Efetivar venda
+```
+curl -X POST http://localhost:8080/api/vendas \
+ -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
+ -d '{"clienteId":"<guid-cliente>","apartamentoId":"<guid-apartamento>","valorEntrada":50000,"valorTotal":380000,"origemReservaId":"<guid-reserva-opcional>"}'
+```
+Testes 
+Para rodar testes:
+```
 dotnet test
-📂 Estrutura do Projeto
-src/
-├── Direcional.Api/         # Projeto principal da API
-│   ├── Controllers/        # Endpoints REST
-│   ├── Infra/              # DbContext, Migrations
-│   ├── Services/           # Serviços (ex: Geração de JWT)
-│   └── Program.cs          # Configuração da aplicação
-│
-└── Direcional.Tests/       # Projeto de testes
-    └── Integration/        # Testes de integração com WebApplicationFactory
+```
+🛠 Dicas de solução de problemas
+PendingModelChangesWarning:
 
+dotnet ef migrations add <nome>
+dotnet ef database update
+API sobe antes do banco:
+```
+docker compose restart api
+```
+Senha do SA inválida: use senha forte.
+
+Swagger não aparece: verifique app.UseSwagger() no Program.cs.
+
+## Decisões técnicas & considerações
+SQL Server Express: alinhado ao stack Microsoft.
+
+JWT: autenticação stateless, fácil de validar.
+
+FluentValidation: regras mais legíveis.
+
+Docker Compose: sobe banco e API juntos.
+
+Migrations: tive que rodar manualmente na primeira execução → deixei documentado.
+
+Camadas: Domain, Application, Infrastructure, API. Evitei over-engineering.
+
+Regras de negócio:
+
+Reserva → bloqueia apartamento (Reservado).
+
+Venda → converte reserva e marca apartamento como Vendido.
