@@ -17,7 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(
         builder.Configuration.GetConnectionString("SqlServer"),
-        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null) // resiliência
+        sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), null) 
     );
 });
 
@@ -27,13 +27,13 @@ builder.Services
     .AddNewtonsoftJson(); 
 
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // pega validators do assembly
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(); 
 
 //
 builder.Services.AddAuthorization();
 
 var jwtKey = builder.Configuration["Jwt:Key"] 
-             ?? throw new InvalidOperationException("JWT Key (Jwt:Key) não foi configurada");//
+             ?? throw new InvalidOperationException("JWT Key (Jwt:Key) não foi configurada");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 

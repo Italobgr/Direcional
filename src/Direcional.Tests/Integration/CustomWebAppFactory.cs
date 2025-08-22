@@ -13,16 +13,17 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
 
     private SqliteConnection? _connection;
 
+    //troca para SQLite in-memory para testes
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
-            // remove o AppDbContext registrado para SQL Server
-            var dbDesc = services.SingleOrDefault(
+            // removendo o AppDbContext 
+            var testedbDesc = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (dbDesc != null) services.Remove(dbDesc);
+            if (testedbDesc != null) services.Remove(testedbDesc);
 
-            // abre uma conexão SQLite in-memory compartilhada
+            
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
@@ -31,9 +32,11 @@ public class CustomWebAppFactory : WebApplicationFactory<Program>
                 opt.UseSqlite(_connection);
             });
 
-            // cria o schema antes dos testes
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            // erro ao criar o banco de dados em memória - tkx
+            using var testee = services.BuildServiceProvider().CreateScope();
+
+
+            var db = testee.ServiceProvider.GetRequiredService<AppDbContext>();
             db.Database.EnsureCreated();
         });
     }
