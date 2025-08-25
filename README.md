@@ -27,7 +27,7 @@ Documentação via **Swagger** e testes (mínimos) com **xUnit**.
 Pré-requisitos:
 - Docker + Docker Compose
 - Porta `8080` livre para a API
-- Porta `1433` livre para o SQL Server (ou mapeie outra)
+- Porta `1433` livre para o SQL Server 
 
 ### Passo a passo
 
@@ -196,30 +196,79 @@ Usar em chamadas
 Authorization: Bearer <jwt-aqui>
 Exemplos de requisições
 
+BASE=http://localhost:8080
+TOKEN="<pergar o tk jwt na rota>"
 Criar cliente
+Campos: nome, email, telefone
 
 ```
-curl -X POST http://localhost:8080/api/clientes \
- -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
- -d '{"nome":"Maria Souza","cpf":"12345678901","email":"maria@exemplo.com","telefone":"31999990000"}'
+curl -X POST "$BASE/api/clientes" \
+ -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+ -d '{
+  "nome":"Maria Souza",
+  "email":"maria@exemplo.com",
+  "telefone":"31999990000"
+}'
 ```
 Criar apartamento
+Campos: endereco, numeroQuartos, valor, disponivel
+(disponivel pode ser omitido; default = true)
+
 ```
-curl -X POST http://localhost:8080/api/apartamentos \
- -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
- -d '{"bloco":"A","numero":"302","areaM2":64.5,"quartos":2,"valor":380000,"status":"Disponivel"}'
+curl -X POST "$BASE/api/apartamentos" \
+ -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+ -d '{
+  "endereco":"Rua das Palmeiras, 123 - Bloco A, ap 302",
+  "numeroQuartos":2,
+  "valor":380000.00,
+  "disponivel":true
+}'
 ```
 Criar reserva
+Campos: idCliente, idApartamento, dataReserva, validade
+(ISO 8601; ex.: 2025-08-25T12:00:00Z)
+
+
+CLIENTE_ID=1
+APTO_ID=1
 ```
-curl -X POST http://localhost:8080/api/reservas \
- -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
- -d '{"clienteId":"<guid-cliente>","apartamentoId":"<guid-apartamento>","valorSinal":10000}'
+curl -X POST "$BASE/api/reservas" \
+ -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+ -d "{
+  \"idCliente\": $CLIENTE_ID,
+  \"idApartamento\": $APTO_ID,
+  \"dataReserva\": \"2025-08-25T12:00:00Z\",
+  \"validade\": \"2025-09-01T00:00:00Z\"
+}"
 ```
-Efetivar venda
+Efetivar venda (CONFIRMAR RESERVA)
+Fluxo oficial: confirmar a reserva → cria a venda.
+Endpoint: POST /api/reservas/{id}/confirmar
+Body: apenas um número JSON (valor final).
+
+
+RESERVA_ID=1
+
+# importante: o body é um número JSON (sem aspas)
 ```
-curl -X POST http://localhost:8080/api/vendas \
- -H "Content-Type: application/json" -H "Authorization: Bearer <TOKEN>" \
- -d '{"clienteId":"<guid-cliente>","apartamentoId":"<guid-apartamento>","valorEntrada":50000,"valorTotal":380000,"origemReservaId":"<guid-reserva-opcional>"}'
+curl -X POST "$BASE/api/reservas/$RESERVA_ID/confirmar" \
+ -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+ --data '345000.00'
+```
+
+Criar venda DIRETA (sem reserva)
+Só funciona se o apartamento estiver disponível=true (não reservado).
+Campos: idCliente, idApartamento, dataVenda, valorFinal
+
+```
+curl -X POST "$BASE/api/vendas" \
+ -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+ -d "{
+  \"idCliente\": $CLIENTE_ID,
+  \"idApartamento\": $APTO_ID,
+  \"dataVenda\": \"2025-08-25T12:00:00Z\",
+  \"valorFinal\": 380000.00
+}"
 ```
 Testes 
 Para rodar testes:
