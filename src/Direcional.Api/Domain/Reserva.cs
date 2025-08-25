@@ -6,7 +6,7 @@ namespace Direcional.Api.Domain
         public int IdCliente { get; set; }
         public int IdApartamento { get; set; }
         public DateTime DataReserva { get; set; }
-        public DateTime? Validade { get; set; }     // opcional
+        public DateTime? Validade { get; set; }     
         public ReservaStatus Status { get; set; } = ReservaStatus.Ativa;
 
         public Cliente? Cliente { get; set; }
