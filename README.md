@@ -33,7 +33,7 @@ Pré-requisitos:
 
 1. **Clonar o repositório**
 ```bash
-git clone https://github.com/<seu-usuario>/<seu-repo>.git
+git clone https://github.com/Italobgr/Direcional.git
 cd <seu-repo>
 
 ```
