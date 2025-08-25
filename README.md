@@ -34,7 +34,7 @@ Pré-requisitos:
 1. **Clonar o repositório**
 ```bash
 git clone https://github.com/Italobgr/Direcional.git
-cd <seu-repo>
+cd Direcional
 
 ```
 (Somente na 1ª vez) Rodar migrations
