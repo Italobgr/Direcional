@@ -112,6 +112,7 @@ services:
 ```
 Banco de dados: estrutura das tabelas
 clientes
+```
 Id (PK, GUID)
 
 Nome
@@ -123,8 +124,10 @@ Email
 Telefone
 
 CriadoEm
-
+```
 apartamentos
+
+```
 Id (PK, GUID)
 
 Bloco
@@ -140,8 +143,9 @@ Valor
 Status → Disponivel, Reservado, Vendido
 
 CriadoEm
-
+```
 reservas
+```
 Id (PK, GUID)
 
 ClienteId (FK → clientes.Id)
@@ -153,8 +157,9 @@ ValorSinal
 DataReserva
 
 Status → Ativa, Cancelada, Convertida
-
+```
 vendas
+```
 Id (PK, GUID)
 
 ClienteId (FK → clientes.Id)
@@ -168,7 +173,7 @@ ValorTotal
 DataVenda
 
 OrigemReservaId (FK opcional → reservas.Id)
-
+```
 Geração e uso do token JWT
 Login
 
