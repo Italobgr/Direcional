@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Study\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj": {}
+    "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Study\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj": {
+    "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Study\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj",
+        "projectUniqueName": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj",
         "projectName": "Direcional.Api",
-        "projectPath": "C:\\Study\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj",
-        "packagesPath": "C:\\Users\\255327\\.nuget\\packages\\",
-        "outputPath": "C:\\Study\\Direcional\\src\\Direcional.Api\\obj\\",
+        "projectPath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj",
+        "packagesPath": "C:\\Users\\Pc Gamer\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\255327\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Pc Gamer\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -73,6 +73,10 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.1, )"
+            },
+            "Microsoft.Data.SqlClient": {
+              "target": "Package",
+              "version": "[6.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.InMemory": {
               "target": "Package",
@@ -112,24 +116,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Study\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj": {
+    "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Study\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj",
+        "projectUniqueName": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj",
         "projectName": "Direcional.Tests",
-        "projectPath": "C:\\Study\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj",
-        "packagesPath": "C:\\Users\\255327\\.nuget\\packages\\",
-        "outputPath": "C:\\Study\\Direcional\\src\\Direcional.Tests\\obj\\",
+        "projectPath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Tests\\Direcional.Tests.csproj",
+        "packagesPath": "C:\\Users\\Pc Gamer\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\255327\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Pc Gamer\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -144,8 +148,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Study\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj": {
-                "projectPath": "C:\\Study\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj"
+              "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj": {
+                "projectPath": "C:\\Users\\Pc Gamer\\Documents\\Projetos\\ProjetoAPI\\Direcional\\src\\Direcional.Api\\Direcional.Api.csproj"
               }
             }
           }
@@ -160,7 +164,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -229,7 +233,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

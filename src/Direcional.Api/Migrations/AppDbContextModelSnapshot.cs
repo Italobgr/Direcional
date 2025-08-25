@@ -30,26 +30,26 @@ namespace Direcional.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Bloco")
+                    b.Property<bool>("Disponivel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Endereco")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Preco")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
+                    b.Property<int>("NumeroQuartos")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Bloco", "Numero")
-                        .IsUnique();
-
-                    b.ToTable("Apartamentos");
+                    b.ToTable("Apartamentos", (string)null);
                 });
 
             modelBuilder.Entity("Direcional.Api.Domain.Cliente", b =>
@@ -60,27 +60,22 @@ namespace Direcional.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Cpf")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Telefone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Cpf")
-                        .IsUnique();
-
-                    b.ToTable("Clientes");
+                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("Direcional.Api.Domain.Reserva", b =>
@@ -90,26 +85,34 @@ namespace Direcional.Api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApartamentoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("DataReserva")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("IdApartamento")
                         .HasColumnType("int");
+
+                    b.Property<int>("IdCliente")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTime?>("Validade")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApartamentoId");
+                    b.HasIndex("IdApartamento")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Reservas_Apto_Ativa")
+                        .HasFilter("[Status] = 1");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("IdCliente");
 
-                    b.ToTable("Reservas");
+                    b.ToTable("Reservas", (string)null);
                 });
 
             modelBuilder.Entity("Direcional.Api.Domain.Venda", b =>
@@ -120,39 +123,40 @@ namespace Direcional.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ApartamentoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("DataVenda")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("ValorEntrada")
+                    b.Property<int>("IdApartamento")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdCliente")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("ValorFinal")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApartamentoId");
+                    b.HasIndex("IdCliente");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("IdApartamento", "DataVenda");
 
-                    b.ToTable("Vendas");
+                    b.ToTable("Vendas", (string)null);
                 });
 
             modelBuilder.Entity("Direcional.Api.Domain.Reserva", b =>
                 {
                     b.HasOne("Direcional.Api.Domain.Apartamento", "Apartamento")
-                        .WithMany()
-                        .HasForeignKey("ApartamentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Reservas")
+                        .HasForeignKey("IdApartamento")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Direcional.Api.Domain.Cliente", "Cliente")
-                        .WithMany()
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Reservas")
+                        .HasForeignKey("IdCliente")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Apartamento");
@@ -163,20 +167,34 @@ namespace Direcional.Api.Migrations
             modelBuilder.Entity("Direcional.Api.Domain.Venda", b =>
                 {
                     b.HasOne("Direcional.Api.Domain.Apartamento", "Apartamento")
-                        .WithMany()
-                        .HasForeignKey("ApartamentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Vendas")
+                        .HasForeignKey("IdApartamento")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Direcional.Api.Domain.Cliente", "Cliente")
-                        .WithMany()
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Vendas")
+                        .HasForeignKey("IdCliente")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Apartamento");
 
                     b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("Direcional.Api.Domain.Apartamento", b =>
+                {
+                    b.Navigation("Reservas");
+
+                    b.Navigation("Vendas");
+                });
+
+            modelBuilder.Entity("Direcional.Api.Domain.Cliente", b =>
+                {
+                    b.Navigation("Reservas");
+
+                    b.Navigation("Vendas");
                 });
 #pragma warning restore 612, 618
         }

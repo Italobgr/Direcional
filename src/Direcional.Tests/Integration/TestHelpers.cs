@@ -1,23 +1,20 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using Direcional.Api.Domain;
+using Direcional.Api.Infra;
 
 namespace Direcional.Tests.Integration;
 
 public static class TestHelpers
 {
-    //-----------------------------------------
-    // helper para autenticar requests
-    //-----------------------------------------
-
-    public static async Task<string> GetJwtAsync(HttpClient client)
+    public static (int clienteId, int aptoId) SeedClienteEApartamento(AppDbContext db,
+        string nome = "Cliente Teste", string endereco = "Rua X, 123", int quartos = 2, decimal valor = 350000m, bool disponivel = true)
     {
-        var resp = await client.PostAsJsonAsync("/api/Auth/login", new { username = "corretor", password = "123" });
-        var json = await resp.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-        return json!["token"];
-    }
+        var c = new Cliente { Nome = nome, Email = "x@x.com", Telefone = "31999999999" };
+        var a = new Apartamento { Endereco = endereco, NumeroQuartos = quartos, Valor = valor, Disponivel = disponivel };
 
-    public static void WithBearer(this HttpClient client, string token)
-    {
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        db.Clientes.Add(c);
+        db.Apartamentos.Add(a);
+        db.SaveChanges();
+
+        return (c.Id, a.Id);
     }
 }

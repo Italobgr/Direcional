@@ -1,23 +1,22 @@
-using Direcional.Api.Dtos;
 using FluentValidation;
 
-namespace Direcional.Api.Dtos.Validators;
-
-public class ClienteCreateValidator : AbstractValidator<ClienteCreateDto>
+namespace Direcional.Api.Dtos
 {
-    public ClienteCreateValidator()
+    public class ClienteCreateDtoValidator : AbstractValidator<ClienteCreateDto>
     {
-        RuleFor(x => x.Nome).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.Cpf).NotEmpty().Length(11);
-        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200);
+        public ClienteCreateDtoValidator()
+        {
+            RuleFor(x => x.Nome).NotEmpty().MaximumLength(150);
+            RuleFor(x => x.Email).EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email));
+        }
     }
-}
 
-public class ClienteUpdateValidator : AbstractValidator<ClienteUpdateDto>
-{
-    public ClienteUpdateValidator()
+    public class ClienteUpdateDtoValidator : AbstractValidator<ClienteUpdateDto>
     {
-        RuleFor(x => x.Nome).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200);
+        public ClienteUpdateDtoValidator()
+        {
+            RuleFor(x => x.Nome).NotEmpty().MaximumLength(150);
+            RuleFor(x => x.Email).EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email));
+        }
     }
 }

@@ -1,71 +1,82 @@
-using System.Linq;
+using System;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using Direcional.Api.Infra;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Diagnostics;   // ✅ para InMemoryEventId
+using Microsoft.EntityFrameworkCore.Storage;      // ✅ para InMemoryDatabaseRoot
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Direcional.Tests.Integration;
 
 public class CustomWebAppFactory : WebApplicationFactory<Program>
 {
-    private SqliteConnection? _connection;
+    // Usa um único "root" de InMemory para garantir que todo o pipeline usa a mesma loja
+    private static readonly InMemoryDatabaseRoot _dbRoot = new();
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-
-
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
         builder.UseEnvironment("Testing");
-        builder.ConfigureAppConfiguration((ctx, cfg) =>
+
+        builder.ConfigureTestServices(services =>
         {
-            cfg.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Jwt:Key"] = "MinhaChaveJWT-Segura-De-Teste-1234567890!",
-                ["Jwt:Issuer"] = "Direcional",
-                ["Jwt:Audience"] = "DirecionalUsers"
-            });
-        });
-
-        builder.ConfigureServices(services =>
-        {
-            // Remova TUDO que for do AppDbContext registrado pela API
-            var toRemove = services
-                .Where(d =>
-                       d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
-                       d.ServiceType == typeof(AppDbContext) ||
-                       d.ServiceType == typeof(IDbContextFactory<AppDbContext>))
-                .ToList();
-            foreach (var d in toRemove) services.Remove(d);
-
-            // Conexão SQLite em memória (compartilhada)
-            _connection = new SqliteConnection("Data Source=:memory:");
-            _connection.Open();
-
-            // >>> Isola o provedor do EF para evitar conflito com SqlServer <<<
-            var efProvider = new ServiceCollection()
-                .AddEntityFrameworkSqlite()
-                .BuildServiceProvider();
-
+            // DbContext InMemory compartilhado + IGNORA transações no InMemory
+            services.RemoveAll(typeof(DbContextOptions<AppDbContext>));
             services.AddDbContext<AppDbContext>(opt =>
+                opt.UseInMemoryDatabase("DirecionalTestsDb", _dbRoot)
+                   .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning)) // ✅ Opção B
+            );
+
+            // Auth fake
+            services.AddAuthentication(options =>
             {
-                opt.UseSqlite(_connection);
-                opt.UseInternalServiceProvider(efProvider); // isolamento do provedor
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme    = "Test";
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
+                    .RequireAuthenticatedUser()
+                    .Build();
             });
 
-            // Cria o schema
-            using var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
+            // Necessário para o construtor antigo do AuthenticationHandler
+            services.TryAddSingleton<ISystemClock, SystemClock>();
         });
     }
+}
 
-    protected override void Dispose(bool disposing)
+public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+#pragma warning disable CS0618 // ISystemClock obsolete (ok em testes)
+    public TestAuthHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock)
+        : base(options, logger, encoder, clock) { }
+#pragma warning restore CS0618
+
+    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        base.Dispose(disposing);
-        _connection?.Close();
-        _connection?.Dispose();
+        var identity = new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim(ClaimTypes.Name, "test-user"),
+        }, "Test");
+
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, "Test");
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }

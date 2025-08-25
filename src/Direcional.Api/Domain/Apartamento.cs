@@ -1,10 +1,14 @@
-namespace Direcional.Api.Domain;
-
-public class Apartamento
+namespace Direcional.Api.Domain
 {
-    public int Id { get; set; }
-    public string Bloco { get; set; } = null!;
-    public string Numero { get; set; } = null!;
-    public decimal Preco { get; set; }
-    public StatusApartamento Status { get; set; } = StatusApartamento.Disponivel;
+    public class Apartamento
+    {
+        public int Id { get; set; }
+        public string Endereco { get; set; } = string.Empty;
+        public int NumeroQuartos { get; set; }
+        public decimal Valor { get; set; }
+        public bool Disponivel { get; set; } = true;
+
+        public ICollection<Venda> Vendas { get; set; } = new List<Venda>();
+        public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
+    }
 }
