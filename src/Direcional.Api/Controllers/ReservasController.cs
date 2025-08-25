@@ -65,7 +65,7 @@ namespace Direcional.Api.Controllers
                 _db.Reservas.Add(r);
                 apto.Disponivel = false;
 
-                // EF Core já envolve este SaveChanges em UMA transação
+              
                 await _db.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetById), new { id = r.Id },
@@ -83,6 +83,25 @@ namespace Direcional.Api.Controllers
 
 
 
+
+
+
+
+/*[HttpPost]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReservaReadDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+    */
+
+
+
+
+
+
+
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, ReservaUpdateDto dto)
         {
@@ -92,7 +111,7 @@ namespace Direcional.Api.Controllers
             if (!await _db.Clientes.AnyAsync(c => c.Id == dto.IdCliente))
                 return BadRequest("Cliente nao encontrado.");
 
-            // troca de apartamento: validar disponibilidade
+           
             if (r.IdApartamento != dto.IdApartamento)
             {
                 var novo = await _db.Apartamentos.FirstOrDefaultAsync(a => a.Id == dto.IdApartamento);
@@ -102,12 +121,12 @@ namespace Direcional.Api.Controllers
                 if (reservado) return Conflict("Novo apartamento ja reservado.");
 
                 var antigo = await _db.Apartamentos.FirstAsync(a => a.Id == r.IdApartamento);
-                antigo.Disponivel = true; // libera antigo
-                novo.Disponivel = false;  // bloqueia novo
+                antigo.Disponivel = true; 
+                novo.Disponivel = false;  
                 r.IdApartamento = dto.IdApartamento;
             }
 
-            // se cancelar, libera o apto
+          
             if (r.Status != ReservaStatus.Cancelada && dto.Status == ReservaStatus.Cancelada)
             {
                 var apto = await _db.Apartamentos.FirstOrDefaultAsync(a => a.Id == r.IdApartamento);
