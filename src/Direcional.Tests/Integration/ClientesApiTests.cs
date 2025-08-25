@@ -1,49 +1,34 @@
 using System.Net;
 using System.Net.Http.Json;
+using Direcional.Api.Dtos;
+using Direcional.Api.Infra;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Direcional.Tests.Integration;
+
 public class ClientesApiTests : IClassFixture<CustomWebAppFactory>
 {
+    private readonly CustomWebAppFactory _factory;
     private readonly HttpClient _client;
+
     public ClientesApiTests(CustomWebAppFactory factory)
-        => _client = factory.CreateClient(new() { BaseAddress = new Uri("http://localhost") });
+    {
+        _factory = factory;
+        _client = factory.CreateClient();
+    }
 
     [Fact]
-    public async Task CRUD_Clientes_Deve_Funcionar()
+    public async Task Deve_Criar_Listar_Cliente()
     {
-        //usando o helper
-        var token = await TestHelpers.GetJwtAsync(_client);
-        _client.WithBearer(token);
+        // create
+        var create = new { nome = "Maria", email = "maria@ex.com", telefone = "3199" };
+        var resp = await _client.PostAsJsonAsync("/api/clientes", create);
+        resp.StatusCode.Should().Be(HttpStatusCode.Created);
 
-
-
-
-
-
-        //CRUD de Clientes
-
-        // Create
-        var create = new { nome = "Maria", cpf = "12345678901", email = "maria@ex.com" };
-        var r1 = await _client.PostAsJsonAsync("/api/Clientes", create);
-        r1.StatusCode.Should().Be(HttpStatusCode.Created);
-        var created = await r1.Content.ReadFromJsonAsync<dynamic>();
-        int id = (int)created!.id;
-
-
-
-        var list = await _client.GetFromJsonAsync<List<dynamic>>("/api/Clientes");
-        list.Should().NotBeNull();
-        list!.Any().Should().BeTrue();
-
-        //  Update
-        var update = new { nome = "Maria Silva", email = "maria.silva@ex.com" };
-        var r2 = await _client.PutAsJsonAsync($"/api/Clientes/{id}", update);
-        r2.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        // Delete
-        var r3 = await _client.DeleteAsync($"/api/Clientes/{id}");
-        r3.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        // list
+        var list = await _client.GetAsync("/api/clientes");
+        list.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

@@ -25,7 +25,7 @@ services:
       dockerfile: Dockerfile
     container_name: direcional_api
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
       # Connection string para a API (dentro da rede do compose o host é "sqlserver")
       - ConnectionStrings__SqlServer=Server=sqlserver,1433;Database=Direcional;User Id=sa;Password=Your_strong_password123;Encrypt=True;TrustServerCertificate=True
       # (Opcional) JWT – ajuste conforme seu Program.cs/appsettings

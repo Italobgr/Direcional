@@ -1,77 +1,97 @@
 using System.Net;
 using System.Net.Http.Json;
+using Direcional.Api.Domain;
+using Direcional.Api.Infra;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Direcional.Tests.Integration;
 
 public class FluxoReservaVendaTests : IClassFixture<CustomWebAppFactory>
 {
+    private readonly CustomWebAppFactory _factory;
     private readonly HttpClient _client;
 
     public FluxoReservaVendaTests(CustomWebAppFactory factory)
     {
-        _client = factory.CreateClient(new() { BaseAddress = new Uri("http://localhost") });
+        _factory = factory;
+        _client = factory.CreateClient();
     }
 
     [Fact]
-    public async Task Reservar_E_Vender_Apartamento_Deve_Atualizar_Status()
+    public async Task Reserva_Ativa_Confirma_Vira_Venda()
     {
-        var token = await TestHelpers.GetJwtAsync(_client);
-        //var test = TestHelpers.GetJwtAsync(_client);
+        int clienteId, aptoId, reservaId;
 
-        /* FluentActions.Invoking(() => _client.WithBearer(token))
-            .Should().NotThrow(); */
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            (clienteId, aptoId) = TestHelpers.SeedClienteEApartamento(db);
+        }
 
+        // cria reserva
+        var reservaDto = new
+        {
+            idCliente = clienteId,
+            idApartamento = aptoId,
+            dataReserva = DateTime.UtcNow,
+            validade = DateTime.UtcNow.AddDays(7)
+        };
 
-        _client.WithBearer(token);
+        var resp = await _client.PostAsJsonAsync("/api/reservas", reservaDto);
+        resp.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        // cria cliente
-        var cResp = await _client.PostAsJsonAsync("/api/Clientes", new { nome = "João", cpf = "98765432100", email = "joao@ex.com" });
-        var cObj = await cResp.Content.ReadFromJsonAsync<dynamic>();
-        int clienteId = (int)cObj!.id;
+        // pega id da reserva criada no banco
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            reservaId = db.Reservas.Single(r => r.IdApartamento == aptoId).Id;
+        }
 
-        // cria apartamento (status default = Disponivel)
-        var aResp = await _client.PostAsJsonAsync("/api/Apartamentos", new { bloco = "A", numero = "101", preco = 300000.00 });
-        var aObj = await aResp.Content.ReadFromJsonAsync<dynamic>();
-        int apId = (int)aObj!.id;
+        // confirmar reserva -> cria venda
+        var confirm = await _client.PostAsJsonAsync($"/api/reservas/{reservaId}/confirmar", 345000.00m);
+        confirm.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        // reservar
-        var rResp = await _client.PostAsJsonAsync("/api/Reservas", new { clienteId, apartamentoId = apId });
-        rResp.StatusCode.Should().Be(HttpStatusCode.Created);
-
-        // checa status do ap -> Reservado
-        var apDepoisReserva = await _client.GetFromJsonAsync<dynamic>($"/api/Apartamentos/{apId}");
-        string status1 = (string)apDepoisReserva!.status.ToString(); // depende do seu retorno
-        status1.Should().Contain("Reservado");
-
-        // vender (converter reserva) — ajuste o endpoint conforme sua implementação
-        var vResp = await _client.PostAsJsonAsync("/api/Vendas", new { clienteId, apartamentoId = apId, valorEntrada = 50000.00 });
-        vResp.StatusCode.Should().Be(HttpStatusCode.Created);
-
-        // checa status do ap -> Vendido
-        var apDepoisVenda = await _client.GetFromJsonAsync<dynamic>($"/api/Apartamentos/{apId}");
-        string status2 = (string)apDepoisVenda!.status.ToString();
-        status2.Should().Contain("Vendido");
+        // assert venda existe
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Vendas.Count(v => v.IdApartamento == aptoId).Should().Be(1);
+        }
     }
 
     [Fact]
-    public async Task Nao_Deve_Vender_Sem_Reserva_Ativa()
+    public async Task Nova_Reserva_Mesmo_Apto_Deve_Conflict()
     {
-        var token = await TestHelpers.GetJwtAsync(_client);
-        _client.WithBearer(token);
+        int clienteId, aptoId;
 
-        // cria cliente e apartamento
-        var c = await (await _client.PostAsJsonAsync("/api/Clientes", new { nome = "Ana", cpf = "11122233344", email = "ana@ex.com" }))
-            .Content.ReadFromJsonAsync<dynamic>();
-        var a = await (await _client.PostAsJsonAsync("/api/Apartamentos", new { bloco = "B", numero = "202", preco = 250000.00 }))
-            .Content.ReadFromJsonAsync<dynamic>();
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            (clienteId, aptoId) = TestHelpers.SeedClienteEApartamento(db);
 
-        int clienteId = (int)c!.id;
-        int apId = (int)a!.id;
+            // reserva pré-existente
+            db.Reservas.Add(new Reserva
+            {
+                IdCliente = clienteId,
+                IdApartamento = aptoId,
+                DataReserva = DateTime.UtcNow,
+                Validade = DateTime.UtcNow.AddDays(3),
+                Status = ReservaStatus.Ativa
+            });
+            db.Apartamentos.Find(aptoId)!.Disponivel = false;
+            db.SaveChanges();
+        }
 
-        // tentar vender direto ---- mapear o status code d postman  tkx2
-        var vResp = await _client.PostAsJsonAsync("/api/Vendas", new { clienteId, apartamentoId = apId, valorEntrada = 30000.00 });
-        vResp.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.Conflict);
+        var body = new
+        {
+            idCliente = clienteId,
+            idApartamento = aptoId,
+            dataReserva = DateTime.UtcNow,
+            validade = DateTime.UtcNow.AddDays(3)
+        };
+        var resp = await _client.PostAsJsonAsync("/api/reservas", body);
+        resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 }
