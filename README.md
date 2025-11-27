@@ -7,7 +7,7 @@ Documentação via **Swagger** e testes (mínimos) com **xUnit**.
 
 ---
 
-## 📑 Sumário
+##  Sumário
 
 - [Como rodar com Docker](#-como-rodar-com-docker)
 - [Estrutura de pastas (resumo)](#-estrutura-de-pastas-resumo)
@@ -22,7 +22,7 @@ Documentação via **Swagger** e testes (mínimos) com **xUnit**.
 
 ---
 
-## 🚀 Como rodar com Docker
+## Como rodar com Docker
 
 Pré-requisitos:
 - Docker + Docker Compose
